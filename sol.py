@@ -12,17 +12,28 @@ def name_extract(word):
     return word.split(',')[1].split('.')[0].strip()
 
 
+# Return Type --> {Mr,Master,Mrs,Miss}
 def group_salutation(old_salutation):
     if old_salutation == 'Mr' or old_salutation == 'Master':
         return (old_salutation)
     elif old_salutation == 'Mrs' or old_salutation == 'Mme':
-        return (old_salutation)
+        return ('Mrs')
     elif old_salutation == 'Miss' or old_salutation == 'Mlle':
-        return (old_salutation)
+        return ('Miss')
     else:
         return ('Others')
 
 
+# Return Type --> numSiblings, ifMarried #
+def split_sibsp(row):
+    sibsp = row['SibSp']
+    age = row['Age']
+    if (sibsp == 0): return (0, 0)
+    if (age < 25): return (sibsp, 0)
+    return (sibsp - 1, 1)
+
+
+# Return Type --> {Children, Adults, Elderly}
 def group_age(age):
     if (age < 12):
         return ('Children')
@@ -48,6 +59,12 @@ def map_ages(df):
     df = pd.merge(df, df4, left_index=True, right_index=True)
     return df
 
+
+### --- Separate passengers from SibSp to Siblings & Spouse --- ###
+def map_sibsp(df):
+    df['Siblings'], df['Married'] = zip(*df.apply(split_sibsp, axis=1))
+    return df
+
 ## -- PREPROSESSING ANALYSIS -- ##
 # Removing rows and columns that are None
 df = pd.read_csv("train.csv")
@@ -57,15 +74,11 @@ df = df.dropna()
 
 df = map_salutation(df)
 df = map_ages(df)
-
+df = map_sibsp(df)
 
 
 ## -- MODEL -- ##
-# model formula
-# here the ~ sign is an = sign, and the features of our dataset
-# are written as a formula to predict survived. The C() lets our
-# regression know that those variables are categorical.
-formula = 'Survived ~ C(Pclass) + C(Sex) + Fare + SibSp  + C(Embarked) + C(New_Salutation) + C(Age_Class)'
+formula = 'Survived ~ C(Pclass) + C(Sex) + Fare + SibSp  + C(Embarked) + C(New_Salutation) + C(Age_Class) + Married + Siblings'
 # create a results dictionary to hold our regression results for easy analysis later
 results = {}
 
