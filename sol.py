@@ -33,9 +33,25 @@ def split_sibsp(row):
     return (sibsp - 1, 1)
 
 
+# Return Type --> numParents, numChildren
+def split_parch(row):
+    age = row['Age']
+    parch = row['Parch']
+    married = row['Married']
+    if (married == 0 and parch > 2): return (2, parch - 2)
+    if (married == 0 and parch < 2): return (parch, 0)
+
+    # Its more likely that he will come with his children than parents
+
+    if (parch > 2): return (2, parch - 2)
+    if (parch <= 2): return (parch, 0)
+
+    return (0, 0)
+
+
 # Return Type --> {Children, Adults, Elderly}
 def group_age(age):
-    if (age < 12):
+    if (age < 18):
         return ('Children')
     elif (age < 50):
         return ('Adults')
@@ -60,9 +76,15 @@ def map_ages(df):
     return df
 
 
-### --- Separate passengers from SibSp to Siblings & Spouse --- ###
+### --- Split SibSp into Siblings & Spouse --- ###
 def map_sibsp(df):
     df['Siblings'], df['Married'] = zip(*df.apply(split_sibsp, axis=1))
+    return df
+
+
+### --- Split Parch into Parents & Children --- ###
+def map_parch(df):
+    df['Parents'], df['Children'] = zip(*df.apply(split_parch, axis=1))
     return df
 
 ## -- PREPROSESSING ANALYSIS -- ##
@@ -75,6 +97,7 @@ df = df.dropna()
 df = map_salutation(df)
 df = map_ages(df)
 df = map_sibsp(df)
+df = map_parch(df)
 
 
 ## -- MODEL -- ##
@@ -95,7 +118,8 @@ for i in range(100):
     # Score the results
     y, x = dmatrices(formula, data=test_data, return_type='dataframe')
     score = score + results_rf.score(x, y)
-print "Mean accuracy of Random Forest Predictions on the data was: {0}".format(score/100)
+
+print "Mean accuracy of Random Forest Predictions on the data was: {0}".format(score / 100)
 
 
 ## -- PROBLEMS -- ##
