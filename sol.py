@@ -42,13 +42,17 @@ formula = 'Survived ~ C(Pclass) + C(Sex) + Age + Fare + SibSp  + C(Embarked) + C
 # create a results dictionary to hold our regression results for easy analysis later
 results = {}
 
+train_data = df[0:500]
+test_data = df[501:]
+
 # Create the random forest model and fit the model to our training data
-y, x = dmatrices(formula, data=df, return_type='dataframe')
+y, x = dmatrices(formula, data=train_data, return_type='dataframe')
 # RandomForestClassifier expects a 1 demensional NumPy array, so we convert
 y = np.asarray(y).ravel()
 # instantiate and fit our model
 results_rf = ske.RandomForestClassifier(n_estimators=100).fit(x, y)
 
 # Score the results
+y, x = dmatrices(formula, data=test_data, return_type='dataframe')
 score = results_rf.score(x, y)
 print "Mean accuracy of Random Forest Predictions on the data was: {0}".format(score)
