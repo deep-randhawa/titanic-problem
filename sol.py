@@ -78,24 +78,24 @@ df = map_sibsp(df)
 
 
 ## -- MODEL -- ##
-formula = 'Survived ~ C(Pclass) + C(Sex) + Fare + SibSp  + C(Embarked) + C(New_Salutation) + C(Age_Class) + Married + Siblings'
+formula = 'Survived ~ C(Pclass) + C(Sex) + Fare + C(Embarked) + C(New_Salutation) + C(Age_Class) + Married + Siblings'
 # create a results dictionary to hold our regression results for easy analysis later
 results = {}
+score = 0
+for i in range(100):
+    train_data, test_data = train_test_split(df, test_size=0.25)
 
-train_data = df[0:500]
-test_data = df[501:]
+    # Create the random forest model and fit the model to our training data
+    y, x = dmatrices(formula, data=train_data, return_type='dataframe')
+    # RandomForestClassifier expects a 1 demensional NumPy array, so we convert
+    y = np.asarray(y).ravel()
+    # instantiate and fit our model
+    results_rf = ske.RandomForestClassifier(n_estimators=100).fit(x, y)
 
-# Create the random forest model and fit the model to our training data
-y, x = dmatrices(formula, data=train_data, return_type='dataframe')
-# RandomForestClassifier expects a 1 demensional NumPy array, so we convert
-y = np.asarray(y).ravel()
-# instantiate and fit our model
-results_rf = ske.RandomForestClassifier(n_estimators=100).fit(x, y)
-
-# Score the results
-y, x = dmatrices(formula, data=test_data, return_type='dataframe')
-score = results_rf.score(x, y)
-print "Mean accuracy of Random Forest Predictions on the data was: {0}".format(score)
+    # Score the results
+    y, x = dmatrices(formula, data=test_data, return_type='dataframe')
+    score = score + results_rf.score(x, y)
+print "Mean accuracy of Random Forest Predictions on the data was: {0}".format(score/100)
 
 
 ## -- PROBLEMS -- ##
