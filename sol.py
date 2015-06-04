@@ -38,7 +38,7 @@ temp1 = df3.groupby('New_Salutation').count()
 # here the ~ sign is an = sign, and the features of our dataset
 # are written as a formula to predict survived. The C() lets our
 # regression know that those variables are categorical.
-formula = 'Survived ~ C(Pclass) + C(Sex) + Age + SibSp  + C(Embarked) + C(New_Salutation)'
+formula = 'Survived ~ C(Pclass) + C(Sex) + Age + Fare + SibSp  + C(Embarked) + C(New_Salutation)'
 # create a results dictionary to hold our regression results for easy analysis later
 results = {}
 
